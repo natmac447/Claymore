@@ -12,7 +12,7 @@ Claymore ships as a focused Rat-inspired distortion plugin for DAW use. The work
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: DSP Foundation** - JUCE 8 project scaffolding, ported Rat DSP, complete signal chain, plugin loads and produces audio
+- [x] **Phase 1: DSP Foundation** - JUCE 8 project scaffolding, ported Rat DSP, complete signal chain, plugin loads and produces audio (completed 2026-02-23)
 - [ ] **Phase 2: Selectable Oversampling** - ClaymoreEngine upgraded to pre-allocated 2x/4x/8x oversampling, thread-safe rate switching, correct DAW latency reporting
 - [ ] **Phase 3: GUI** - Pedal-style editor with knobs for all parameters, oversampling selector, full DAW automation
 - [ ] **Phase 4: Validation and Distribution** - auval + pluginval pass, code-signed and notarized Universal Binary, ready to ship
@@ -29,7 +29,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Tightness, Sag, Tone, and Presence controls each produce audible and distinct tonal changes
   4. Input Gain, Output Gain, and Dry/Wet Mix controls scale the signal as expected; brickwall limiter prevents digital overs on extreme settings
   5. Noise gate closes on silence and reopens on signal above threshold; gate operates pre-distortion (sustain is not cut at high Drive)
-**Plans:** 2/3 plans executed
+**Plans:** 3/3 plans complete
 Plans:
 - [x] 01-01-PLAN.md — Project scaffold: CMake + JUCE 8.0.12 FetchContent, APVTS parameter layout, PluginProcessor/Editor shell
 - [x] 01-02-PLAN.md — DSP engine: port fuzz files from GunkLord, ClaymoreEngine with noise gate hysteresis and 2x oversampling, OutputLimiter
@@ -73,7 +73,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. DSP Foundation | 2/3 | In Progress|  |
+| 1. DSP Foundation | 3/3 | Complete   | 2026-02-23 |
 | 2. Selectable Oversampling | 0/TBD | Not started | - |
 | 3. GUI | 0/TBD | Not started | - |
 | 4. Validation and Distribution | 0/TBD | Not started | - |
