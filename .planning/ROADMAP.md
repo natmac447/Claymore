@@ -43,7 +43,9 @@ Plans:
   1. Oversampling rate can be switched between 2x, 4x, and 8x without audio dropout, glitch, or DAW crash
   2. PDC compensation in a multi-track session remains correct after switching oversampling rates (no pre-echo or timing offset on the processed track)
   3. Dry/wet mix at 50% produces no phase cancellation artifact (null test passes) at all three oversampling rates
-**Plans**: TBD
+**Plans:** 1 plan
+Plans:
+- [ ] 02-01-PLAN.md — Upgrade ClaymoreEngine to pre-allocated 2x/4x/8x oversampling array, add APVTS oversampling parameter, per-block rate-change detection with latency re-sync
 
 ### Phase 3: GUI
 **Goal**: Plugin is fully usable from the GUI with a pedal-style interface and all parameters automatable from the DAW
@@ -74,6 +76,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. DSP Foundation | 3/3 | Complete   | 2026-02-23 |
-| 2. Selectable Oversampling | 0/TBD | Not started | - |
+| 2. Selectable Oversampling | 0/1 | In progress | - |
 | 3. GUI | 0/TBD | Not started | - |
 | 4. Validation and Distribution | 0/TBD | Not started | - |
