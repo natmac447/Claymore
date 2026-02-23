@@ -36,8 +36,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### GUI
 
-- [ ] **GUI-01**: Pedal-style minimal interface with knobs for all distortion and signal chain parameters
-- [ ] **GUI-02**: Oversampling rate selector accessible from GUI
+- [x] **GUI-01**: Pedal-style minimal interface with knobs for all distortion and signal chain parameters
+- [x] **GUI-02**: Oversampling rate selector accessible from GUI
 - [ ] **GUI-03**: All parameters automatable from DAW
 
 ## v2 Requirements
@@ -90,8 +90,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | QUAL-02 | Phase 2 | Complete (02-01) |
 | FMT-01 | Phase 4 | Pending |
 | FMT-02 | Phase 4 | Pending |
-| GUI-01 | Phase 3 | Pending |
-| GUI-02 | Phase 3 | Pending |
+| GUI-01 | Phase 3 | Complete |
+| GUI-02 | Phase 3 | Complete |
 | GUI-03 | Phase 3 | Pending |
 
 **Coverage:**

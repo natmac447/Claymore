@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-23)
 
 **Core value:** A Rat-inspired distortion with enough range and tonal control to be useful on any source material — from subtle saturation to aggressive destruction — in a focused, pedal-style interface.
-**Current focus:** Phase 2 — Oversampling (Phase 1 complete)
+**Current focus:** Phase 3 — GUI (Phase 2 complete)
 
 ## Current Position
 
-Phase: 2 of 4 (Selectable Oversampling)
-Plan: 1 of 1 in current phase — Phase 2 Plan 1 COMPLETE
-Status: Phase 2 complete, ready for Phase 3
-Last activity: 2026-02-23 — Plan 02-01 complete: Selectable 2x/4x/8x oversampling with DAW latency re-sync
+Phase: 3 of 4 (GUI)
+Plan: 1 of 2 in current phase — Phase 3 Plan 1 COMPLETE
+Status: Phase 3 Plan 1 complete, ready for Phase 3 Plan 2
+Last activity: 2026-02-23 — Plan 03-01 complete: ClaymoreTheme LookAndFeel + OversamplingSelector + BinaryData asset pipeline
 
-Progress: [████░░░░░░] 40%
+Progress: [█████░░░░░] 50%
 
 ## Performance Metrics
 
@@ -29,10 +29,11 @@ Progress: [████░░░░░░] 40%
 |-------|-------|-------|----------|
 | 01-dsp-foundation | 3 | 12 min | 4 min |
 | 02-selectable-oversampling | 1 | 4 min | 4 min |
+| 03-gui | 1 | 3 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: 7 min, 2 min, 3 min, 4 min
-- Trend: Fast (4 min avg — minimal new code, targeted modifications)
+- Last 5 plans: 7 min, 2 min, 3 min, 4 min, 3 min
+- Trend: Fast (3 min avg — targeted additions, no processor changes)
 
 *Updated after each plan completion*
 
@@ -61,6 +62,9 @@ Recent decisions affecting current work:
 - [Phase 02-01]: Re-prepare all smoothers and FuzzCoreState at new oversampled rate on every switch
 - [Phase 02-01]: dryWetMixer capacity 256 (was 64) — 8x IIR latency can reach ~60 samples at high sample rates
 - [Phase 02-01]: setLatencySamples() called directly from processBlock on rate change (Crucible pattern); VST3 re-entrancy remains empirical verification item
+- [Phase 03-gui]: BinaryData symbol names strip hyphens: CormorantGaramond-Light.ttf -> CormorantGaramondLight_ttf (not CormorantGaramond_Light_ttf)
+- [Phase 03-gui]: getLabelFont renamed to getKnobLabelFont to avoid collision with LookAndFeel_V2::getLabelFont(Label&) virtual function
+- [Phase 03-gui]: BinaryData.h included as plain header — JUCE adds the JuceLibraryCode include path automatically
 
 ### Pending Todos
 
@@ -75,5 +79,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed 02-01-PLAN.md — Selectable 2x/4x/8x oversampling with DAW latency re-sync; Phase 2 complete
+Stopped at: Completed 03-01-PLAN.md — ClaymoreTheme LookAndFeel + OversamplingSelector + BinaryData asset pipeline
 Resume file: None
