@@ -75,30 +75,30 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DIST-01 | — | Pending |
-| DIST-02 | — | Pending |
-| DIST-03 | — | Pending |
-| DIST-04 | — | Pending |
-| DIST-05 | — | Pending |
-| DIST-06 | — | Pending |
-| SIG-01 | — | Pending |
-| SIG-02 | — | Pending |
-| SIG-03 | — | Pending |
-| SIG-04 | — | Pending |
-| SIG-05 | — | Pending |
-| QUAL-01 | — | Pending |
-| QUAL-02 | — | Pending |
-| FMT-01 | — | Pending |
-| FMT-02 | — | Pending |
-| GUI-01 | — | Pending |
-| GUI-02 | — | Pending |
-| GUI-03 | — | Pending |
+| DIST-01 | Phase 1 | Pending |
+| DIST-02 | Phase 1 | Pending |
+| DIST-03 | Phase 1 | Pending |
+| DIST-04 | Phase 1 | Pending |
+| DIST-05 | Phase 1 | Pending |
+| DIST-06 | Phase 1 | Pending |
+| SIG-01 | Phase 1 | Pending |
+| SIG-02 | Phase 1 | Pending |
+| SIG-03 | Phase 1 | Pending |
+| SIG-04 | Phase 1 | Pending |
+| SIG-05 | Phase 1 | Pending |
+| QUAL-01 | Phase 2 | Pending |
+| QUAL-02 | Phase 2 | Pending |
+| FMT-01 | Phase 4 | Pending |
+| FMT-02 | Phase 4 | Pending |
+| GUI-01 | Phase 3 | Pending |
+| GUI-02 | Phase 3 | Pending |
+| GUI-03 | Phase 3 | Pending |
 
 **Coverage:**
 - v1 requirements: 18 total
-- Mapped to phases: 0
-- Unmapped: 18 ⚠️
+- Mapped to phases: 18
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-23*
-*Last updated: 2026-02-23 after initial definition*
+*Last updated: 2026-02-23 after roadmap creation*
