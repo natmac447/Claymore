@@ -32,10 +32,21 @@ juce_add_plugin(Claymore
     BUNDLE_ID                   com.nathanmcmillan.claymore
 )
 
+# Embedded assets — fonts and logos for GUI
+juce_add_binary_data(ClaymoreAssets
+    NAMESPACE ClaymoreAssets
+    SOURCES
+        Assets/Fonts/CormorantGaramond-Light.ttf
+        Assets/Fonts/DMSans-Regular.ttf
+        Assets/Fonts/DMSans-Light.ttf
+        Assets/Logos/cairn-makers-mark.svg
+)
+
 # Explicit source list — do NOT use GLOB_RECURSE
 target_sources(Claymore PRIVATE
     Source/PluginProcessor.cpp
     Source/PluginEditor.cpp
+    Source/look/ClaymoreTheme.cpp
 )
 
 # Compile definitions
@@ -50,6 +61,7 @@ target_compile_definitions(Claymore
 # Link libraries
 target_link_libraries(Claymore
     PRIVATE
+        ClaymoreAssets
         juce::juce_audio_utils
         juce::juce_audio_processors
         juce::juce_dsp

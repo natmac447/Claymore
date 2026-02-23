@@ -1,0 +1,9 @@
+<svg width="60" height="70" viewBox="0 0 60 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Cairn Maker's Mark — For plugin back panels, subtle placement -->
+  <!-- Small triangle -->
+  <path d="M30 6 L52 44 H8 Z" stroke="#b8b0a5" stroke-width="1.0" fill="none" stroke-linejoin="miter" opacity="0.6"/>
+  <!-- Bisecting line -->
+  <line x1="2" y1="31" x2="58" y2="31" stroke="#b8b0a5" stroke-width="0.6" opacity="0.25"/>
+  <!-- Wordmark -->
+  <text x="30" y="62" text-anchor="middle" font-family="'Cormorant Garamond', Georgia, serif" font-weight="400" font-size="8" letter-spacing="4" fill="#b8b0a5" opacity="0.45">CAIRN</text>
+</svg>
