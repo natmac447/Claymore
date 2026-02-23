@@ -29,7 +29,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Tightness, Sag, Tone, and Presence controls each produce audible and distinct tonal changes
   4. Input Gain, Output Gain, and Dry/Wet Mix controls scale the signal as expected; brickwall limiter prevents digital overs on extreme settings
   5. Noise gate closes on silence and reopens on signal above threshold; gate operates pre-distortion (sustain is not cut at high Drive)
-**Plans:** 3 plans
+**Plans:** 1/3 plans executed
 Plans:
 - [ ] 01-01-PLAN.md — Project scaffold: CMake + JUCE 8.0.12 FetchContent, APVTS parameter layout, PluginProcessor/Editor shell
 - [ ] 01-02-PLAN.md — DSP engine: port fuzz files from GunkLord, ClaymoreEngine with noise gate hysteresis and 2x oversampling, OutputLimiter
@@ -73,7 +73,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. DSP Foundation | 0/3 | Planning complete | - |
+| 1. DSP Foundation | 1/3 | In Progress|  |
 | 2. Selectable Oversampling | 0/TBD | Not started | - |
 | 3. GUI | 0/TBD | Not started | - |
 | 4. Validation and Distribution | 0/TBD | Not started | - |

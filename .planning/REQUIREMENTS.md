@@ -9,20 +9,20 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Distortion
 
-- [ ] **DIST-01**: User can control distortion amount via Drive knob (1x–40x gain range)
-- [ ] **DIST-02**: User can blend between hard clip and soft clip via Symmetry knob
-- [ ] **DIST-03**: User can control low-frequency input to distortion via Tightness (HPF 20–300 Hz)
-- [ ] **DIST-04**: User can add bias-starve sputter character via Sag knob
-- [ ] **DIST-05**: User can shape post-distortion tone via Tone (LP sweep 800–8000 Hz)
-- [ ] **DIST-06**: User can boost/cut high-frequency presence via Presence shelf (+/-6 dB at 4 kHz)
+- [x] **DIST-01**: User can control distortion amount via Drive knob (1x–40x gain range)
+- [x] **DIST-02**: User can blend between hard clip and soft clip via Symmetry knob
+- [x] **DIST-03**: User can control low-frequency input to distortion via Tightness (HPF 20–300 Hz)
+- [x] **DIST-04**: User can add bias-starve sputter character via Sag knob
+- [x] **DIST-05**: User can shape post-distortion tone via Tone (LP sweep 800–8000 Hz)
+- [x] **DIST-06**: User can boost/cut high-frequency presence via Presence shelf (+/-6 dB at 4 kHz)
 
 ### Signal Chain
 
-- [ ] **SIG-01**: User can adjust input level before distortion via Input Gain (-24 to +24 dB)
-- [ ] **SIG-02**: User can adjust output level after distortion via Output Gain (-48 to +12 dB)
-- [ ] **SIG-03**: User can blend dry and wet signal via Mix knob (latency-compensated dry path)
-- [ ] **SIG-04**: Output is limited by brickwall limiter to prevent digital overs
-- [ ] **SIG-05**: User can enable noise gate with adjustable threshold (-60 to -10 dB)
+- [x] **SIG-01**: User can adjust input level before distortion via Input Gain (-24 to +24 dB)
+- [x] **SIG-02**: User can adjust output level after distortion via Output Gain (-48 to +12 dB)
+- [x] **SIG-03**: User can blend dry and wet signal via Mix knob (latency-compensated dry path)
+- [x] **SIG-04**: Output is limited by brickwall limiter to prevent digital overs
+- [x] **SIG-05**: User can enable noise gate with adjustable threshold (-60 to -10 dB)
 
 ### Quality
 
@@ -75,17 +75,17 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DIST-01 | Phase 1 | Pending |
-| DIST-02 | Phase 1 | Pending |
-| DIST-03 | Phase 1 | Pending |
-| DIST-04 | Phase 1 | Pending |
-| DIST-05 | Phase 1 | Pending |
-| DIST-06 | Phase 1 | Pending |
-| SIG-01 | Phase 1 | Pending |
-| SIG-02 | Phase 1 | Pending |
-| SIG-03 | Phase 1 | Pending |
-| SIG-04 | Phase 1 | Pending |
-| SIG-05 | Phase 1 | Pending |
+| DIST-01 | Phase 1 | Complete |
+| DIST-02 | Phase 1 | Complete |
+| DIST-03 | Phase 1 | Complete |
+| DIST-04 | Phase 1 | Complete |
+| DIST-05 | Phase 1 | Complete |
+| DIST-06 | Phase 1 | Complete |
+| SIG-01 | Phase 1 | Complete |
+| SIG-02 | Phase 1 | Complete |
+| SIG-03 | Phase 1 | Complete |
+| SIG-04 | Phase 1 | Complete |
+| SIG-05 | Phase 1 | Complete |
 | QUAL-01 | Phase 2 | Pending |
 | QUAL-02 | Phase 2 | Pending |
 | FMT-01 | Phase 4 | Pending |
