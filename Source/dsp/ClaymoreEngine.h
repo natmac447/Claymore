@@ -18,6 +18,10 @@
  * - Tone LPF extended: 2–20 kHz (handled inside FuzzTone.h, per CONTEXT.md)
  * - Custom noise gate state machine with hysteresis (instead of JUCE NoiseGate alone)
  * - Sag gain-makeup for gain-neutrality (CONTEXT.md requirement)
+ *
+ * Hidden gate parameters (setGateAttack, setGateRelease, setGateSidechainHPF, setGateRange,
+ * setGateHysteresis) are exposed here but not shown in the main UI — Phase 3 will
+ * surface them via a right-click context menu.
  */
 class ClaymoreEngine
 {
@@ -45,15 +49,26 @@ public:
         // Prepare tone filtering at original sample rate
         tone.prepare (spec);
 
+        // Sidechain HPF: per-channel, highpass at 150 Hz default
+        // Applied to the level-detection path ONLY — not to the audio path
+        {
+            juce::dsp::ProcessSpec monoSpec;
+            monoSpec.sampleRate       = sampleRate;
+            monoSpec.maximumBlockSize = spec.maximumBlockSize;
+            monoSpec.numChannels      = 1;
+
+            for (int ch = 0; ch < maxChannels; ++ch)
+            {
+                sidechainHPF[ch].prepare (monoSpec);
+                sidechainHPF[ch].setType (juce::dsp::FirstOrderTPTFilterType::highpass);
+                sidechainHPF[ch].setCutoffFrequency (gateSidechainHPFHz);
+            }
+        }
+
         // Noise gate — custom state machine (hysteresis, see pitfalls notes)
         // The JUCE NoiseGate has no hysteresis; we implement dual-threshold manually.
-        // Set up envelope follower for gating decisions
-        // Attack/release coefficients for the envelope follower
-        const float attackMs  = gateAttackMs;
-        const float releaseMs = gateReleaseMs;
-        gateAttackCoeff  = std::exp (-1.0f / (static_cast<float> (sampleRate) * (attackMs  / 1000.0f)));
-        gateReleaseCoeff = std::exp (-1.0f / (static_cast<float> (sampleRate) * (releaseMs / 1000.0f)));
-        gateEnvelope     = 0.0f;
+        recalculateGateCoefficients();
+        gateEnvelope = 0.0f;
         gateGainSmoother.reset (static_cast<float> (sampleRate), 0.001);  // 1ms smoother
         gateGainSmoother.setCurrentAndTargetValue (1.0f);
         gateIsOpen = false;
@@ -143,7 +158,10 @@ public:
         oversampling.reset();
 
         for (int ch = 0; ch < maxChannels; ++ch)
+        {
             coreState[ch].reset();
+            sidechainHPF[ch].reset();
+        }
 
         tone.reset();
 
@@ -185,8 +203,68 @@ public:
 
     void setGateThreshold (float thresholdDB)
     {
-        // thresholdDB is the open threshold; close threshold is 4 dB lower (hysteresis)
+        // thresholdDB is the open threshold; close threshold is hysteresis dB lower
         gateOpenThreshold  = juce::jlimit (-60.0f, -10.0f, thresholdDB);
+        gateCloseThreshold = gateOpenThreshold - gateHysteresisDB;
+    }
+
+    // --- Hidden gate parameters (Phase 3 exposes via right-click context menu) ---
+
+    /** Attack time in milliseconds. Faster = more transient click suppression. Default: 1ms. */
+    void setGateAttack (float attackMs)
+    {
+        gateAttackMs = juce::jlimit (0.1f, 100.0f, attackMs);
+        if (sampleRate > 0.0)
+            recalculateGateCoefficients();
+    }
+
+    /** Release time in milliseconds. Longer = more natural tail. Default: 80ms. */
+    void setGateRelease (float releaseMs)
+    {
+        gateReleaseMs = juce::jlimit (1.0f, 2000.0f, releaseMs);
+        if (sampleRate > 0.0)
+            recalculateGateCoefficients();
+    }
+
+    /**
+     * Gate ratio: 1.0 = full gating (only rangeDB remains), 0.0 = no gating.
+     * Scales the effective range: actualRange = rangeDB * ratio.
+     * Default: 1.0 (full range attenuation).
+     */
+    void setGateRatio (float ratio)
+    {
+        gateRatio = juce::jlimit (0.0f, 1.0f, ratio);
+    }
+
+    /**
+     * Sidechain HPF cutoff frequency in Hz.
+     * Filters out low-frequency content from the level-detection path,
+     * preventing bass from triggering the gate. Default: 150 Hz.
+     */
+    void setGateSidechainHPF (float hz)
+    {
+        gateSidechainHPFHz = juce::jlimit (20.0f, 2000.0f, hz);
+        for (int ch = 0; ch < maxChannels; ++ch)
+            sidechainHPF[ch].setCutoffFrequency (gateSidechainHPFHz);
+    }
+
+    /**
+     * Gate range: maximum attenuation in dB when gate is closed.
+     * Negative value (e.g., -60 dB). Default: -60 dB.
+     */
+    void setGateRange (float rangeDB)
+    {
+        gateRangeDB = juce::jlimit (-120.0f, -6.0f, rangeDB);
+    }
+
+    /**
+     * Hysteresis: difference between open and close thresholds in dB.
+     * Larger = less chatter on borderline signals. Default: 4 dB.
+     */
+    void setGateHysteresis (float hysteresisDB)
+    {
+        gateHysteresisDB = juce::jlimit (0.0f, 12.0f, hysteresisDB);
+        // Recalculate close threshold based on new hysteresis
         gateCloseThreshold = gateOpenThreshold - gateHysteresisDB;
     }
 
@@ -199,14 +277,21 @@ private:
         const int   numSamples         = buffer.getNumSamples();
         const float openThreshLinear   = juce::Decibels::decibelsToGain (gateOpenThreshold);
         const float closeThreshLinear  = juce::Decibels::decibelsToGain (gateCloseThreshold);
-        const float rangeGain          = juce::Decibels::decibelsToGain (gateRangeDB);
+        // Range scales with ratio: 0 = no attenuation, 1 = full gateRangeDB attenuation
+        const float effectiveRangeDB   = gateRangeDB * gateRatio;
+        const float rangeGain          = juce::Decibels::decibelsToGain (effectiveRangeDB);
 
         for (int s = 0; s < numSamples; ++s)
         {
-            // Measure peak level across all channels at this sample
+            // Measure peak level across all channels at this sample,
+            // after applying sidechain HPF (level detection only — audio path unchanged)
             float peakLevel = 0.0f;
             for (int ch = 0; ch < chCount; ++ch)
-                peakLevel = juce::jmax (peakLevel, std::abs (buffer.getSample (ch, s)));
+            {
+                const float rawSample    = buffer.getSample (ch, s);
+                const float filteredSamp = sidechainHPF[ch].processSample (0, rawSample);
+                peakLevel = juce::jmax (peakLevel, std::abs (filteredSamp));
+            }
 
             // Envelope follower (first-order IIR)
             if (peakLevel > gateEnvelope)
@@ -227,6 +312,13 @@ private:
             for (int ch = 0; ch < chCount; ++ch)
                 buffer.setSample (ch, s, buffer.getSample (ch, s) * gain);
         }
+    }
+
+    void recalculateGateCoefficients()
+    {
+        const float sr = static_cast<float> (sampleRate);
+        gateAttackCoeff  = std::exp (-1.0f / (sr * (gateAttackMs  / 1000.0f)));
+        gateReleaseCoeff = std::exp (-1.0f / (sr * (gateReleaseMs / 1000.0f)));
     }
 
     // -------------------------------------------------------------------------
@@ -256,10 +348,16 @@ private:
     float gateCloseThreshold = -44.0f;  // dBFS — 4 dB hysteresis
 
     // Hidden gate parameters (power-user; exposed via context menu in Phase 3)
-    static constexpr float gateAttackMs    = 1.0f;    // 1ms attack (fast, avoids click)
-    static constexpr float gateReleaseMs   = 80.0f;   // 80ms release (natural tail)
-    static constexpr float gateHysteresisDB = 4.0f;   // 4 dB open-close difference
-    static constexpr float gateRangeDB     = -60.0f;  // -60 dB attenuation when closed
+    float gateAttackMs      = 1.0f;    // 1ms attack (fast, avoids click)
+    float gateReleaseMs     = 80.0f;   // 80ms release (natural tail)
+    float gateHysteresisDB  = 4.0f;    // 4 dB open-close difference
+    float gateRangeDB       = -60.0f;  // -60 dB attenuation when closed
+    float gateRatio         = 1.0f;    // 1.0 = full range applied
+    float gateSidechainHPFHz = 150.0f; // Sidechain HPF cutoff: 150 Hz default
+
+    // Sidechain HPF filters — per channel, highpass at gateSidechainHPFHz
+    // Applied to the level-detection signal path only (NOT to the audio output)
+    juce::dsp::FirstOrderTPTFilter<float> sidechainHPF[maxChannels];
 
     // --- DSP parameters ---
     float targetDrive     = 0.5f;
