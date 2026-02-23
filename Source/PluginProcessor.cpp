@@ -1,5 +1,6 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include <cmath>
 
 // =============================================================================
 ClaymoreProcessor::ClaymoreProcessor()
@@ -25,6 +26,9 @@ ClaymoreProcessor::ClaymoreProcessor()
     mixParam           = apvts.getRawParameterValue (ParamIDs::mix);
     gateEnabledParam   = apvts.getRawParameterValue (ParamIDs::gateEnabled);
     gateThresholdParam = apvts.getRawParameterValue (ParamIDs::gateThreshold);
+
+    // Quality
+    oversamplingParam  = apvts.getRawParameterValue (ParamIDs::oversampling);
 }
 
 // =============================================================================
@@ -56,6 +60,12 @@ void ClaymoreProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     // Prepare ClaymoreEngine (oversampling + fuzz DSP)
     engine.prepare (spec);
 
+    // Apply the saved oversampling index before reporting latency (QUAL-01, QUAL-02)
+    const int initialOsIndex = static_cast<int> (oversamplingParam->load (std::memory_order_relaxed));
+    if (initialOsIndex != 0)
+        engine.setOversamplingFactor (initialOsIndex);
+    lastOversamplingIndex = initialOsIndex;
+
     // Prepare output limiter
     outputLimiter.prepare (spec);
 
@@ -64,8 +74,8 @@ void ClaymoreProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
     dryWetMixer.setMixingRule (juce::dsp::DryWetMixingRule::linear);
     dryWetMixer.setWetLatency (engine.getLatencyInSamples());
 
-    // Report oversampling latency to DAW for session-level compensation
-    setLatencySamples (static_cast<int> (engine.getLatencyInSamples()));
+    // Report oversampling latency to DAW for session-level compensation (Pitfall 2: std::round)
+    setLatencySamples (static_cast<int> (std::round (engine.getLatencyInSamples())));
 
     // Prepare gain smoothers (5ms ramp at current sample rate)
     const float initialInputGainLinear  = juce::Decibels::decibelsToGain (
@@ -124,6 +134,20 @@ void ClaymoreProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     const float mix           = mixParam->load        (std::memory_order_relaxed);
     const bool  gateOn        = gateEnabledParam->load (std::memory_order_relaxed) >= 0.5f;
     const float gateThreshDB  = gateThresholdParam->load (std::memory_order_relaxed);
+
+    // --- Oversampling rate change detection (QUAL-01, QUAL-02) ---
+    {
+        const int newOversamplingIndex = static_cast<int> (oversamplingParam->load (std::memory_order_relaxed));
+        if (newOversamplingIndex != lastOversamplingIndex)
+        {
+            lastOversamplingIndex = newOversamplingIndex;
+            engine.setOversamplingFactor (newOversamplingIndex);
+
+            const float newLatency = engine.getLatencyInSamples();
+            dryWetMixer.setWetLatency (newLatency);
+            setLatencySamples (static_cast<int> (std::round (newLatency)));
+        }
+    }
 
     // --- 1. Input Gain (pre-distortion level trim) ---
     {

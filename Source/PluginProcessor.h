@@ -67,6 +67,10 @@ private:
     // Initialization guard: some hosts call processBlock before prepareToPlay
     std::atomic<bool> isInitialized { false };
 
+    // Oversampling rate-change tracking (QUAL-01)
+    // Compared per-block against oversamplingParam to detect user rate changes
+    int lastOversamplingIndex = 0;
+
     // Cached atomic parameter pointers — set in prepareToPlay, read in processBlock
     // Distortion
     std::atomic<float>* driveParam    = nullptr;
@@ -81,14 +85,16 @@ private:
     std::atomic<float>* mixParam           = nullptr;
     std::atomic<float>* gateEnabledParam   = nullptr;
     std::atomic<float>* gateThresholdParam = nullptr;
+    // Quality
+    std::atomic<float>* oversamplingParam  = nullptr;
 
     // DSP objects
     ClaymoreEngine engine;
     OutputLimiter  outputLimiter;
 
     // Dry/wet mixer with latency compensation for oversampling (SIG-03)
-    // 64-sample capacity: sufficient for 2x IIR oversampling latency (~4 samples)
-    juce::dsp::DryWetMixer<float> dryWetMixer { 64 };
+    // 256-sample capacity: sufficient for 8x IIR oversampling latency (~60 samples max)
+    juce::dsp::DryWetMixer<float> dryWetMixer { 256 };
 
     // Input/output gain as SmoothedValues (multiplicative, not dB — converted on use)
     // Smooth at audio rate to prevent zipper noise on gain changes
