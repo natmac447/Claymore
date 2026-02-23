@@ -55,7 +55,10 @@ Plans:
   1. All 9 signal parameters (Drive, Symmetry, Tightness, Sag, Tone, Presence, Input Gain, Output Gain, Mix) are visible as labeled knobs; Noise Gate threshold is accessible; all controls respond to mouse interaction
   2. Oversampling rate selector is visible and functional in the GUI; current rate is clearly indicated
   3. All parameters accept DAW automation write and read correctly in a session (knobs visually track automation playback)
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 03-01-PLAN.md — Asset pipeline (fonts, SVG, CMake BinaryData) + ClaymoreTheme LookAndFeel + OversamplingSelector component
+- [ ] 03-02-PLAN.md — ClaymoreEditor full rewrite: Cairn 4-zone layout, Drive hero knob, all APVTS attachments, visual polish
 
 ### Phase 4: Validation and Distribution
 **Goal**: Plugin passes formal AU and VST3 validation and is code-signed and notarized for macOS distribution
@@ -77,5 +80,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 |-------|----------------|--------|-----------|
 | 1. DSP Foundation | 3/3 | Complete   | 2026-02-23 |
 | 2. Selectable Oversampling | 1/1 | Complete | 2026-02-23 |
-| 3. GUI | 0/TBD | Not started | - |
+| 3. GUI | 0/2 | Not started | - |
 | 4. Validation and Distribution | 0/TBD | Not started | - |
