@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-02-23)
 
 ## Current Position
 
-Phase: 1 of 4 (DSP Foundation)
-Plan: 3 of 3 in current phase — Phase 1 COMPLETE
-Status: Phase 1 complete, ready for Phase 2
-Last activity: 2026-02-23 — Plan 01-03 complete: Release VST3+AU Universal Binary verified; Phase 1 DSP Foundation finished
+Phase: 2 of 4 (Selectable Oversampling)
+Plan: 1 of 1 in current phase — Phase 2 Plan 1 COMPLETE
+Status: Phase 2 complete, ready for Phase 3
+Last activity: 2026-02-23 — Plan 02-01 complete: Selectable 2x/4x/8x oversampling with DAW latency re-sync
 
-Progress: [███░░░░░░░] 30%
+Progress: [████░░░░░░] 40%
 
 ## Performance Metrics
 
@@ -28,10 +28,11 @@ Progress: [███░░░░░░░] 30%
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-dsp-foundation | 3 | 12 min | 4 min |
+| 02-selectable-oversampling | 1 | 4 min | 4 min |
 
 **Recent Trend:**
-- Last 5 plans: 7 min, 2 min, 3 min
-- Trend: Fast (verification-heavy, minimal new code)
+- Last 5 plans: 7 min, 2 min, 3 min, 4 min
+- Trend: Fast (4 min avg — minimal new code, targeted modifications)
 
 *Updated after each plan completion*
 
@@ -54,6 +55,12 @@ Recent decisions affecting current work:
 - 01-02: Gate ratio as range scaler (actualRangeDB = gateRangeDB * gateRatio) — Phase 3 can expose for soft-knee behavior
 - [Phase 01-03]: processBlock pre-complete from Plan 01-01 (fca99eb): no changes needed in Plan 01-03 — verified correct against all must_have requirements
 - [Phase 01-03]: CMakeLists.txt unchanged: ClaymoreEngine is header-only (01-02 decision), no ClaymoreEngine.cpp needed in target_sources
+- [Phase 02-01]: Pre-allocate all 3 Oversampling objects in prepare() — no allocation in setOversamplingFactor() or process(); zero-allocation hot path guaranteed
+- [Phase 02-01]: useIntegerLatency = false (consistent with Phase 1); std::round used for setLatencySamples() and DryWetMixer::setWetLatency()
+- [Phase 02-01]: Reset OLD oversampling object state before switching index to prevent stale IIR filter ringing
+- [Phase 02-01]: Re-prepare all smoothers and FuzzCoreState at new oversampled rate on every switch
+- [Phase 02-01]: dryWetMixer capacity 256 (was 64) — 8x IIR latency can reach ~60 samples at high sample rates
+- [Phase 02-01]: setLatencySamples() called directly from processBlock on rate change (Crucible pattern); VST3 re-entrancy remains empirical verification item
 
 ### Pending Todos
 
@@ -68,5 +75,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-23
-Stopped at: Completed 01-03-PLAN.md — Release VST3+AU Universal Binary verified; Phase 1 DSP Foundation complete
+Stopped at: Completed 02-01-PLAN.md — Selectable 2x/4x/8x oversampling with DAW latency re-sync; Phase 2 complete
 Resume file: None

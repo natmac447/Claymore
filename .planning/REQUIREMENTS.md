@@ -26,8 +26,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Quality
 
-- [ ] **QUAL-01**: User can select oversampling rate (2x, 4x, 8x) to trade CPU for quality
-- [ ] **QUAL-02**: Plugin reports correct latency to DAW for all oversampling rates
+- [x] **QUAL-01**: User can select oversampling rate (2x, 4x, 8x) to trade CPU for quality
+- [x] **QUAL-02**: Plugin reports correct latency to DAW for all oversampling rates
 
 ### Format
 
@@ -86,8 +86,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SIG-03 | Phase 1 | Complete |
 | SIG-04 | Phase 1 | Complete |
 | SIG-05 | Phase 1 | Complete |
-| QUAL-01 | Phase 2 | Pending |
-| QUAL-02 | Phase 2 | Pending |
+| QUAL-01 | Phase 2 | Complete (02-01) |
+| QUAL-02 | Phase 2 | Complete (02-01) |
 | FMT-01 | Phase 4 | Pending |
 | FMT-02 | Phase 4 | Pending |
 | GUI-01 | Phase 3 | Pending |

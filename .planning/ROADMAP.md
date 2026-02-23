@@ -13,7 +13,7 @@ Claymore ships as a focused Rat-inspired distortion plugin for DAW use. The work
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: DSP Foundation** - JUCE 8 project scaffolding, ported Rat DSP, complete signal chain, plugin loads and produces audio (completed 2026-02-23)
-- [ ] **Phase 2: Selectable Oversampling** - ClaymoreEngine upgraded to pre-allocated 2x/4x/8x oversampling, thread-safe rate switching, correct DAW latency reporting
+- [x] **Phase 2: Selectable Oversampling** - ClaymoreEngine upgraded to pre-allocated 2x/4x/8x oversampling, thread-safe rate switching, correct DAW latency reporting (completed 2026-02-23)
 - [ ] **Phase 3: GUI** - Pedal-style editor with knobs for all parameters, oversampling selector, full DAW automation
 - [ ] **Phase 4: Validation and Distribution** - auval + pluginval pass, code-signed and notarized Universal Binary, ready to ship
 
@@ -45,7 +45,7 @@ Plans:
   3. Dry/wet mix at 50% produces no phase cancellation artifact (null test passes) at all three oversampling rates
 **Plans:** 1 plan
 Plans:
-- [ ] 02-01-PLAN.md — Upgrade ClaymoreEngine to pre-allocated 2x/4x/8x oversampling array, add APVTS oversampling parameter, per-block rate-change detection with latency re-sync
+- [x] 02-01-PLAN.md — Upgrade ClaymoreEngine to pre-allocated 2x/4x/8x oversampling array, add APVTS oversampling parameter, per-block rate-change detection with latency re-sync
 
 ### Phase 3: GUI
 **Goal**: Plugin is fully usable from the GUI with a pedal-style interface and all parameters automatable from the DAW
@@ -76,6 +76,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. DSP Foundation | 3/3 | Complete   | 2026-02-23 |
-| 2. Selectable Oversampling | 0/1 | In progress | - |
+| 2. Selectable Oversampling | 1/1 | Complete | 2026-02-23 |
 | 3. GUI | 0/TBD | Not started | - |
 | 4. Validation and Distribution | 0/TBD | Not started | - |
