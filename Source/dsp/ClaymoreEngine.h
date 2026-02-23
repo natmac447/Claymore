@@ -1,5 +1,7 @@
 #pragma once
 
+#include <array>
+#include <memory>
 #include <juce_dsp/juce_dsp.h>
 #include "fuzz/FuzzType.h"
 #include "fuzz/FuzzCore.h"
@@ -8,10 +10,11 @@
 /**
  * Main DSP signal chain for Claymore.
  *
- * Signal chain (Phase 1 — fixed 2x oversampling):
+ * Signal chain (Phase 2 — selectable 2x/4x/8x oversampling):
  *   NoiseGate → [Oversample Up] → FuzzCore (per-sample) → [Oversample Down] → FuzzTone
  *
- * Phase 2 will upgrade oversampling to selectable 2x/4x/8x.
+ * Three Oversampling objects are pre-allocated in prepare() (one per rate).
+ * setOversamplingFactor() switches between them with zero allocation in process().
  *
  * Based on GunkLord FuzzStage.h with Claymore-specific changes:
  * - Tightness HPF extended: 20–800 Hz (was 20–300 Hz, per CONTEXT.md)
@@ -26,23 +29,29 @@
 class ClaymoreEngine
 {
 public:
-    ClaymoreEngine()
-        : oversampling (2, 1,
-            juce::dsp::Oversampling<float>::filterHalfBandPolyphaseIIR, true)
-    {
-    }
+    ClaymoreEngine() = default;
 
     void prepare (const juce::dsp::ProcessSpec& spec)
     {
-        sampleRate  = spec.sampleRate;
-        numChannels = static_cast<int> (spec.numChannels);
+        sampleRate   = spec.sampleRate;
+        numChannels  = static_cast<int> (spec.numChannels);
+        maxBlockSize = static_cast<int> (spec.maximumBlockSize);
 
-        // Prepare oversampling (2x with IIR half-band filters)
-        oversampling.initProcessing (static_cast<size_t> (spec.maximumBlockSize));
-        oversampling.reset();
+        // Pre-allocate all three oversampling objects (2x, 4x, 8x) — zero allocation in process()
+        for (int i = 0; i < numOversamplingFactors; ++i)
+        {
+            oversamplingObjects[i] = std::make_unique<juce::dsp::Oversampling<float>> (
+                static_cast<size_t> (numChannels),
+                static_cast<size_t> (i + 1),  // 1=2x, 2=4x, 3=8x
+                juce::dsp::Oversampling<float>::filterHalfBandPolyphaseIIR,
+                true,   // isMaxQuality
+                false   // useIntegerLatency (consistent with Phase 1)
+            );
+            oversamplingObjects[i]->initProcessing (static_cast<size_t> (spec.maximumBlockSize));
+        }
 
         // Prepare per-channel fuzz core state at oversampled rate
-        const double oversampledRate = sampleRate * 2.0;
+        const double oversampledRate = sampleRate * std::pow (2.0, currentOversamplingIndex + 1);
         for (int ch = 0; ch < maxChannels; ++ch)
             coreState[ch].prepare (oversampledRate);
 
@@ -98,7 +107,8 @@ public:
 
         // 2. Upsample
         juce::dsp::AudioBlock<float> block (buffer);
-        auto oversampledBlock = oversampling.processSamplesUp (block);
+        auto& os = *oversamplingObjects[currentOversamplingIndex];
+        auto oversampledBlock = os.processSamplesUp (block);
 
         // 3. Per-channel per-sample waveshaping in oversampled domain
         const int numSamples = static_cast<int> (oversampledBlock.getNumSamples());
@@ -147,7 +157,7 @@ public:
         }
 
         // 4. Downsample
-        oversampling.processSamplesDown (block);
+        os.processSamplesDown (block);
 
         // 5. Apply tone filtering + presence + DC blocker (at original rate)
         tone.applyTone (buffer);
@@ -155,7 +165,9 @@ public:
 
     void reset()
     {
-        oversampling.reset();
+        for (int i = 0; i < numOversamplingFactors; ++i)
+            if (oversamplingObjects[i])
+                oversamplingObjects[i]->reset();
 
         for (int ch = 0; ch < maxChannels; ++ch)
         {
@@ -177,7 +189,7 @@ public:
 
     float getLatencyInSamples() const
     {
-        return oversampling.getLatencyInSamples();
+        return oversamplingObjects[currentOversamplingIndex]->getLatencyInSamples();
     }
 
     // --- Parameter setters (called per-block by PluginProcessor) ---
@@ -188,6 +200,38 @@ public:
     void setSag       (float sagVal)   { targetSag       = juce::jlimit (0.0f, 1.0f, sagVal); }
     void setTone      (float toneVal)  { tone.setTone     (juce::jlimit (0.0f, 1.0f, toneVal)); }
     void setPresence  (float presence) { tone.setPresence (juce::jlimit (0.0f, 1.0f, presence)); }
+
+    /**
+     * Switch to a different oversampling rate.
+     * index: 0 = 2x, 1 = 4x, 2 = 8x
+     *
+     * Called from PluginProcessor::processBlock() on rate change (QUAL-01).
+     * Safe to call from the audio thread — no allocation, no locks.
+     * Resets stale filter state, re-prepares smoothers and FuzzCoreState at new rate.
+     */
+    void setOversamplingFactor (int index)
+    {
+        const int newIndex = juce::jlimit (0, numOversamplingFactors - 1, index);
+        if (newIndex == currentOversamplingIndex)
+            return;
+
+        // Reset the OLD oversampling object's filter state (prevents stale state artifacts)
+        oversamplingObjects[currentOversamplingIndex]->reset();
+
+        currentOversamplingIndex = newIndex;
+
+        // Recalculate oversampled rate for smoothers and FuzzCoreState
+        const double newOsRate = sampleRate * std::pow (2.0, currentOversamplingIndex + 1);
+
+        driveSmoother.reset (newOsRate, 0.010);
+        symmetrySmoother.reset (newOsRate, 0.005);
+        tightnessSmoother.reset (newOsRate, 0.005);
+        sagSmoother.reset (newOsRate, 0.005);
+
+        // Re-prepare FuzzCoreState at new oversampled rate
+        for (int ch = 0; ch < maxChannels; ++ch)
+            coreState[ch].prepare (newOsRate);
+    }
 
     void setGateEnabled (bool enabled)
     {
@@ -324,8 +368,11 @@ private:
     // -------------------------------------------------------------------------
     static constexpr int maxChannels = 8;
 
-    // Internal 2x oversampling with IIR half-band filters
-    juce::dsp::Oversampling<float> oversampling;
+    // Pre-allocated oversampling objects: index 0 = 2x, 1 = 4x, 2 = 8x
+    // All three are created in prepare(); switching is zero-allocation
+    static constexpr int numOversamplingFactors = 3;
+    std::array<std::unique_ptr<juce::dsp::Oversampling<float>>, numOversamplingFactors> oversamplingObjects;
+    int currentOversamplingIndex = 0;  // 0 = 2x (default), 1 = 4x, 2 = 8x
 
     // Per-channel waveshaping state
     FuzzCoreState coreState[maxChannels];
@@ -374,4 +421,5 @@ private:
     // Spec
     double sampleRate  = 44100.0;
     int    numChannels = 2;
+    int    maxBlockSize = 512;
 };

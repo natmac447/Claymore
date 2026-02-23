@@ -5,9 +5,10 @@
 /**
  * Claymore APVTS parameter IDs and layout factory.
  *
- * All 11 parameters:
+ * All 12 parameters:
  *   Distortion: drive, symmetry, tightness, sag, tone, presence
  *   Signal chain: inputGain, outputGain, mix, gateEnabled, gateThreshold
+ *   Quality: oversampling
  *
  * Parameter names use descriptive mixing-tool language (not GunkLord's creative names).
  */
@@ -28,6 +29,9 @@ namespace ParamIDs
     inline constexpr const char* mix            = "mix";
     inline constexpr const char* gateEnabled    = "gateEnabled";
     inline constexpr const char* gateThreshold  = "gateThreshold";
+
+    // Quality controls
+    inline constexpr const char* oversampling   = "oversampling";
 }
 
 /**
@@ -133,6 +137,15 @@ inline juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout
         NormalisableRange<float> (-60.0f, -10.0f, 0.1f),
         -40.0f,
         AudioParameterFloatAttributes{}.withLabel ("dB")));
+
+    // Oversampling: selectable quality vs. CPU tradeoff (QUAL-01, QUAL-02)
+    // Index 0 = 2x (lowest latency), 1 = 4x, 2 = 8x (highest quality)
+    layout.add (std::make_unique<AudioParameterChoice> (
+        ParameterID { ParamIDs::oversampling, 1 },
+        "Oversampling",
+        StringArray { "2x", "4x", "8x" },
+        0  // default: 2x (index 0)
+    ));
 
     return layout;
 }
