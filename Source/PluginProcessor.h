@@ -63,6 +63,18 @@ public:
     // APVTS (public — editor reads it directly)
     juce::AudioProcessorValueTreeState apvts;
 
+    // Gate advanced settings (forwarded to ClaymoreEngine)
+    float getGateAttack()       const { return engine.getGateAttack(); }
+    float getGateRelease()      const { return engine.getGateRelease(); }
+    float getGateHysteresis()   const { return engine.getGateHysteresis(); }
+    float getGateRange()        const { return engine.getGateRange(); }
+    float getGateSidechainHPF() const { return engine.getGateSidechainHPF(); }
+    void  setGateAttack       (float v) { engine.setGateAttack (v); }
+    void  setGateRelease      (float v) { engine.setGateRelease (v); }
+    void  setGateHysteresis   (float v) { engine.setGateHysteresis (v); }
+    void  setGateRange        (float v) { engine.setGateRange (v); }
+    void  setGateSidechainHPF (float v) { engine.setGateSidechainHPF (v); }
+
 private:
     // Initialization guard: some hosts call processBlock before prepareToPlay
     std::atomic<bool> isInitialized { false };
@@ -74,7 +86,7 @@ private:
     // Cached atomic parameter pointers — set in prepareToPlay, read in processBlock
     // Distortion
     std::atomic<float>* driveParam    = nullptr;
-    std::atomic<float>* symmetryParam = nullptr;
+    std::atomic<float>* clipTypeParam = nullptr;
     std::atomic<float>* tightnessParam= nullptr;
     std::atomic<float>* sagParam      = nullptr;
     std::atomic<float>* toneParam     = nullptr;

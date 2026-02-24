@@ -36,10 +36,9 @@ juce_add_plugin(Claymore
 juce_add_binary_data(ClaymoreAssets
     NAMESPACE ClaymoreAssets
     SOURCES
-        Assets/Fonts/CormorantGaramond-Light.ttf
+        Assets/Fonts/CormorantGaramond.ttf
         Assets/Fonts/DMSans-Regular.ttf
         Assets/Fonts/DMSans-Light.ttf
-        Assets/Logos/cairn-makers-mark.svg
 )
 
 # Explicit source list — do NOT use GLOB_RECURSE

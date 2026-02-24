@@ -3,16 +3,15 @@
 #include <juce_audio_utils/juce_audio_utils.h>
 #include "PluginProcessor.h"
 #include "look/ClaymoreTheme.h"
-#include "gui/OversamplingSelector.h"
 
 /**
  * ClaymoreEditor — full pedal-style GUI with Cairn 4-zone layout.
  *
  * Cairn layout (700 x 500px fixed):
- *   - Header  (36px):   CLAYMORE title (Cormorant Garamond) + LED bypass indicator
+ *   - Header  (36px):   CLAYMORE title + OVERSAMPLING ComboBox + LED bypass indicator
  *   - Primary (~362px): Drive hero knob (110px) + 9 satellite knobs with labels
- *   - Utility (80px):   Output Gain, Mix knobs + OversamplingSelector
- *   - Footer  (22px):   Cairn makers-mark + version string (painted only)
+ *   - Utility (80px):   Input Gain, Mix, Output Gain knobs
+ *   - Footer  (34px):   Cairn logo + "CAIRN" text + version string (painted only)
  *
  * Destruction order:
  *   Attachments MUST be declared AFTER their corresponding sliders (C++ member
@@ -27,6 +26,7 @@ public:
 
     void paint (juce::Graphics& g) override;
     void resized() override;
+    void mouseDown (const juce::MouseEvent& e) override;
 
 private:
     //===========================================================================
@@ -42,12 +42,8 @@ private:
     juce::Rectangle<int> utilityZone;
     juce::Rectangle<int> footerZone;
 
-    // 4. Cairn makers-mark SVG
-    std::unique_ptr<juce::Drawable> makersMark;
-
-    // 5. Sliders — declared BEFORE attachments
+    // 4. Sliders — declared BEFORE attachments
     juce::Slider driveKnob;
-    juce::Slider symmetryKnob;
     juce::Slider tightnessKnob;
     juce::Slider sagKnob;
 
@@ -64,7 +60,6 @@ private:
 
     // 7. Labels — one per knob
     juce::Label driveLabel;
-    juce::Label symmetryLabel;
     juce::Label tightnessLabel;
     juce::Label sagLabel;
 
@@ -75,14 +70,12 @@ private:
     juce::Label outputGainLabel;
     juce::Label mixLabel;
     juce::Label gateThresholdLabel;
-    juce::Label gateLabel;
 
     // 8. Attachments — declared AFTER sliders (destroyed first, disconnects before slider dies)
     using SliderAttachment = juce::AudioProcessorValueTreeState::SliderAttachment;
     using ButtonAttachment = juce::AudioProcessorValueTreeState::ButtonAttachment;
 
     SliderAttachment driveAttach;
-    SliderAttachment symmetryAttach;
     SliderAttachment tightnessAttach;
     SliderAttachment sagAttach;
 
@@ -96,8 +89,15 @@ private:
 
     ButtonAttachment gateEnabledAttach;
 
-    // 9. OversamplingSelector
-    std::unique_ptr<OversamplingSelector> oversamplingSelector;
+    // 9. Oversampling — header dropdown
+    juce::ComboBox oversamplingBox;
+    using ComboBoxAttachment = juce::AudioProcessorValueTreeState::ComboBoxAttachment;
+    std::unique_ptr<ComboBoxAttachment> oversamplingAttach;
+
+    // 10. Clip Type — detented rotary knob (primary zone)
+    juce::Slider clipTypeKnob;
+    juce::Label  clipTypeLabel;
+    std::unique_ptr<SliderAttachment> clipTypeAttach;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ClaymoreEditor)
 };

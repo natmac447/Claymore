@@ -87,9 +87,6 @@ public:
         driveSmoother.setCurrentAndTargetValue (targetDrive);
 
         // Other parameter smoothers: 5ms ramp (at oversampled rate)
-        symmetrySmoother.reset (oversampledRate, 0.005);
-        symmetrySmoother.setCurrentAndTargetValue (targetSymmetry);
-
         tightnessSmoother.reset (oversampledRate, 0.005);
         tightnessSmoother.setCurrentAndTargetValue (targetTightness);
 
@@ -115,7 +112,6 @@ public:
 
         // Set smoother targets
         driveSmoother.setTargetValue (targetDrive);
-        symmetrySmoother.setTargetValue (targetSymmetry);
         tightnessSmoother.setTargetValue (targetTightness);
         sagSmoother.setTargetValue (targetSag);
 
@@ -125,21 +121,19 @@ public:
 
             for (int s = 0; s < numSamples; ++s)
             {
-                float drive, symmetry, tightness, sag;
+                float drive, tightness, sag;
 
                 // Only advance smoothers on ch 0; read current value on remaining channels
                 // (same pattern as GunkLord FuzzStage)
                 if (ch == 0)
                 {
                     drive     = driveSmoother.getNextValue();
-                    symmetry  = symmetrySmoother.getNextValue();
                     tightness = tightnessSmoother.getNextValue();
                     sag       = sagSmoother.getNextValue();
                 }
                 else
                 {
                     drive     = driveSmoother.getCurrentValue();
-                    symmetry  = symmetrySmoother.getCurrentValue();
                     tightness = tightnessSmoother.getCurrentValue();
                     sag       = sagSmoother.getCurrentValue();
                 }
@@ -150,7 +144,7 @@ public:
                 coreState[ch].tightnessFilter.setCutoffFrequency (tightCutoff);
 
                 const float mappedDrive = FuzzConfig::mapDrive (drive);
-                data[s] = FuzzCore::processSample (data[s], mappedDrive, symmetry, sag,
+                data[s] = FuzzCore::processSample (data[s], mappedDrive, targetClipType, sag,
                                                     coreState[ch]);
                 data[s] *= FuzzConfig::outputCompensation;
             }
@@ -178,7 +172,6 @@ public:
         tone.reset();
 
         driveSmoother.setCurrentAndTargetValue (targetDrive);
-        symmetrySmoother.setCurrentAndTargetValue (targetSymmetry);
         tightnessSmoother.setCurrentAndTargetValue (targetTightness);
         sagSmoother.setCurrentAndTargetValue (targetSag);
 
@@ -195,7 +188,7 @@ public:
     // --- Parameter setters (called per-block by PluginProcessor) ---
 
     void setDrive     (float drive)    { targetDrive     = juce::jlimit (0.0f, 1.0f, drive); }
-    void setSymmetry  (float sym)      { targetSymmetry  = juce::jlimit (0.0f, 1.0f, sym); }
+    void setClipType  (int type)       { targetClipType  = juce::jlimit (0, static_cast<int> (ClipType::Rectifier), type); }
     void setTightness (float tight)    { targetTightness = juce::jlimit (0.0f, 1.0f, tight); }
     void setSag       (float sagVal)   { targetSag       = juce::jlimit (0.0f, 1.0f, sagVal); }
     void setTone      (float toneVal)  { tone.setTone     (juce::jlimit (0.0f, 1.0f, toneVal)); }
@@ -224,7 +217,6 @@ public:
         const double newOsRate = sampleRate * std::pow (2.0, currentOversamplingIndex + 1);
 
         driveSmoother.reset (newOsRate, 0.010);
-        symmetrySmoother.reset (newOsRate, 0.005);
         tightnessSmoother.reset (newOsRate, 0.005);
         sagSmoother.reset (newOsRate, 0.005);
 
@@ -311,6 +303,13 @@ public:
         // Recalculate close threshold based on new hysteresis
         gateCloseThreshold = gateOpenThreshold - gateHysteresisDB;
     }
+
+    // --- Gate parameter getters (for advanced menu display) ---
+    float getGateAttack()       const { return gateAttackMs; }
+    float getGateRelease()      const { return gateReleaseMs; }
+    float getGateHysteresis()   const { return gateHysteresisDB; }
+    float getGateRange()        const { return gateRangeDB; }
+    float getGateSidechainHPF() const { return gateSidechainHPFHz; }
 
 private:
     // --- Noise gate with hysteresis ---
@@ -408,13 +407,12 @@ private:
 
     // --- DSP parameters ---
     float targetDrive     = 0.5f;
-    float targetSymmetry  = 0.0f;
+    int   targetClipType  = 0;     // ClipType::Silicon
     float targetTightness = 0.0f;
     float targetSag       = 0.0f;
 
-    // Parameter smoothers
+    // Parameter smoothers (clipType is discrete — no smoother needed)
     juce::SmoothedValue<float> driveSmoother;
-    juce::SmoothedValue<float> symmetrySmoother;
     juce::SmoothedValue<float> tightnessSmoother;
     juce::SmoothedValue<float> sagSmoother;
 

@@ -1,12 +1,13 @@
 #pragma once
 
 #include <juce_audio_processors/juce_audio_processors.h>
+#include "dsp/fuzz/FuzzType.h"
 
 /**
  * Claymore APVTS parameter IDs and layout factory.
  *
  * All 12 parameters:
- *   Distortion: drive, symmetry, tightness, sag, tone, presence
+ *   Distortion: drive, clipType, tightness, sag, tone, presence
  *   Signal chain: inputGain, outputGain, mix, gateEnabled, gateThreshold
  *   Quality: oversampling
  *
@@ -17,7 +18,7 @@ namespace ParamIDs
 {
     // Distortion controls
     inline constexpr const char* drive     = "drive";
-    inline constexpr const char* symmetry  = "symmetry";
+    inline constexpr const char* clipType  = "clipType";
     inline constexpr const char* tightness = "tightness";
     inline constexpr const char* sag       = "sag";
     inline constexpr const char* tone      = "tone";
@@ -57,13 +58,13 @@ inline juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout
         0.5f,
         AudioParameterFloatAttributes{}.withLabel ("Drive")));
 
-    // Symmetry: 0 = hard clip (Rat), 1 = soft clip with envelope bias (Germanium)
-    layout.add (std::make_unique<AudioParameterFloat> (
-        ParameterID { ParamIDs::symmetry, 1 },
-        "Symmetry",
-        NormalisableRange<float> (0.0f, 1.0f, 0.01f),
-        0.0f,
-        AudioParameterFloatAttributes{}.withLabel ("Symmetry")));
+    // Clip Type: selects diode clipping circuit (8 variants)
+    layout.add (std::make_unique<AudioParameterChoice> (
+        ParameterID { ParamIDs::clipType, 1 },
+        "Clip Type",
+        clipTypeNames,
+        0  // default: Silicon (index 0)
+    ));
 
     // Tightness: HPF before distortion (maps to 20–800 Hz in ClaymoreEngine)
     layout.add (std::make_unique<AudioParameterFloat> (

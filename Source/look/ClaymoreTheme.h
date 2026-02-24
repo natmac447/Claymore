@@ -4,29 +4,31 @@
 #include <juce_gui_basics/juce_gui_basics.h>
 
 /**
- * ClaymoreTheme — custom LookAndFeel_V4 subclass for the Claymore distortion plugin.
+ * ClaymoreTheme — custom LookAndFeel_V4 for the Claymore distortion plugin.
  *
- * Implements the Cairn design system:
- *   - White matte knobs with silver metallic indicator line
- *   - Cold blue steel arc fill for active parameter range
- *   - Cormorant Garamond for wordmark / title text
- *   - DM Sans Regular/Light for knob labels and value readouts
- *   - Powder-coated grain texture background
- *   - LED bulb-style indicator with glow bloom
+ * Industrial Functionalism aesthetic (Dieter Rams inspired):
+ *   - Light warm gray matte surface (powder-coat)
+ *   - Dark anthracite knobs with brushed aluminum indicator
+ *   - LED dot arc position indicators (warm amber active, muted inactive)
+ *   - Cormorant Garamond wordmark, DM Sans lowercase labels
+ *   - Minimal decoration, maximum function
  */
 
 namespace ClaymoreColors
 {
-    // Cairn color tokens (Claymore-specific cold blue adaptation)
-    constexpr juce::uint32 background  = 0xff1c1a1f;  // Basalt + blue shift
-    constexpr juce::uint32 surface     = 0xff2a2523;  // Hearth — elevated panels
-    constexpr juce::uint32 border      = 0xff5c5147;  // Zone separators (use at 10-15% alpha)
-    constexpr juce::uint32 labelText   = 0xffb8b0a5;  // Lichen — knob labels
-    constexpr juce::uint32 primaryText = 0xffd8d3cc;  // Bone — title, values
-    constexpr juce::uint32 accent      = 0xff4a7cb5;  // Cold blue steel
-    constexpr juce::uint32 knobBody    = 0xffe8e4df;  // Off-white matte
-    constexpr juce::uint32 indicator   = 0xffc8c8c8;  // Silver metallic
-    constexpr juce::uint32 makersMark  = 0xff5c5147;  // At 25% alpha for footer
+    // Industrial Functionalism palette — light matte surface, dark controls
+    constexpr juce::uint32 background    = 0xffd5d0c9;  // Warm light gray (powder-coat matte)
+    constexpr juce::uint32 surface       = 0xffcac5bd;  // Slightly darker (zone differentiation)
+    constexpr juce::uint32 border        = 0xff9a9490;  // Zone separators (use at 10-15% alpha)
+    constexpr juce::uint32 labelText     = 0xff4a4540;  // Dark warm gray — labels
+    constexpr juce::uint32 primaryText   = 0xff2a2622;  // Near-black — title, values
+    constexpr juce::uint32 accent        = 0xffc27a52;  // Warm terracotta
+    constexpr juce::uint32 knobBody      = 0xff2e2e2e;  // Dark anthracite
+    constexpr juce::uint32 knobHighlight = 0xff3e3e3e;  // Top-lit sheen
+    constexpr juce::uint32 indicator     = 0xffb8b8b8;  // Brushed aluminum line
+    constexpr juce::uint32 ledActive     = 0xffd49060;  // Warm amber LED
+    constexpr juce::uint32 ledInactive   = 0xff807870;  // Muted inactive dot
+    constexpr juce::uint32 makersMark    = 0xff6a6460;  // Footer branding
 }
 
 class ClaymoreTheme : public juce::LookAndFeel_V4
@@ -51,6 +53,20 @@ public:
                            bool shouldDrawButtonAsDown) override;
 
     void drawLabel (juce::Graphics& g, juce::Label& label) override;
+
+    void drawComboBox (juce::Graphics& g, int width, int height,
+                       bool isButtonDown,
+                       int buttonX, int buttonY, int buttonW, int buttonH,
+                       juce::ComboBox& box) override;
+    juce::Font getComboBoxFont (juce::ComboBox& box) override;
+    void positionComboBoxText (juce::ComboBox& box, juce::Label& label) override;
+    juce::Font getPopupMenuFont() override;
+    void drawPopupMenuBackground (juce::Graphics& g, int width, int height) override;
+    void drawPopupMenuItem (juce::Graphics& g, const juce::Rectangle<int>& area,
+                            bool isSeparator, bool isActive, bool isHighlighted,
+                            bool isTicked, bool hasSubMenu,
+                            const juce::String& text, const juce::String& shortcutKeyText,
+                            const juce::Drawable* icon, const juce::Colour* textColour) override;
 
     //==============================================================================
     // Font helpers — JUCE 8 FontOptions API

@@ -14,7 +14,7 @@ ClaymoreProcessor::ClaymoreProcessor()
 
     // Distortion
     driveParam     = apvts.getRawParameterValue (ParamIDs::drive);
-    symmetryParam  = apvts.getRawParameterValue (ParamIDs::symmetry);
+    clipTypeParam  = apvts.getRawParameterValue (ParamIDs::clipType);
     tightnessParam = apvts.getRawParameterValue (ParamIDs::tightness);
     sagParam       = apvts.getRawParameterValue (ParamIDs::sag);
     toneParam      = apvts.getRawParameterValue (ParamIDs::tone);
@@ -124,7 +124,7 @@ void ClaymoreProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
     // --- Read all parameters (atomic loads, no string lookups) ---
     const float drive         = driveParam->load     (std::memory_order_relaxed);
-    const float symmetry      = symmetryParam->load   (std::memory_order_relaxed);
+    const int   clipType      = static_cast<int> (clipTypeParam->load (std::memory_order_relaxed));
     const float tightness     = tightnessParam->load  (std::memory_order_relaxed);
     const float sag           = sagParam->load        (std::memory_order_relaxed);
     const float tone          = toneParam->load       (std::memory_order_relaxed);
@@ -172,7 +172,7 @@ void ClaymoreProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
     // --- 3. ClaymoreEngine: noise gate → oversample → fuzz → tone ---
     engine.setDrive         (drive);
-    engine.setSymmetry      (symmetry);
+    engine.setClipType      (clipType);
     engine.setTightness     (tightness);
     engine.setSag           (sag);
     engine.setTone          (tone);
