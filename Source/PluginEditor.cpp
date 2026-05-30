@@ -23,6 +23,34 @@ ClaymoreEditor::ClaymoreEditor (ClaymoreProcessor& p)
     setLookAndFeel (&theme);
 
     //==========================================================================
+    // Give each APVTS-attached slider an addressable identity matching its host
+    // parameter's display name. setTitle feeds the accessibilityTitle and setName
+    // feeds getName() — automated harnesses (Forge) resolve a control by either,
+    // so we set both. UI/accessibility label only; this touches no parameter
+    // definition or preset state. The name is read from the live parameter layout
+    // so it stays in sync if a display name ever changes.
+    auto nameSlider = [&p] (juce::Slider& slider, const char* paramID)
+    {
+        if (auto* param = p.apvts.getParameter (paramID))
+        {
+            const juce::String displayName = param->getName (256);
+            slider.setTitle (displayName); // -> accessibilityTitle
+            slider.setName  (displayName); // -> Component::getName()
+        }
+    };
+
+    nameSlider (driveKnob,         ParamIDs::drive);
+    nameSlider (tightnessKnob,     ParamIDs::tightness);
+    nameSlider (sagKnob,           ParamIDs::sag);
+    nameSlider (toneKnob,          ParamIDs::tone);
+    nameSlider (presenceKnob,      ParamIDs::presence);
+    nameSlider (inputGainKnob,     ParamIDs::inputGain);
+    nameSlider (outputGainKnob,    ParamIDs::outputGain);
+    nameSlider (mixKnob,           ParamIDs::mix);
+    nameSlider (gateThresholdKnob, ParamIDs::gateThreshold);
+    nameSlider (clipTypeKnob,      ParamIDs::clipType);
+
+    //==========================================================================
     // Configure all rotary knobs
     for (auto* knob : { &driveKnob, &tightnessKnob, &sagKnob,
                         &toneKnob, &presenceKnob,
